@@ -1,3 +1,119 @@
+
+# 📄 Descripción de la Problemática
+
+---
+
+## 🌍 Contexto General
+
+En organizaciones de escala global como **Globant**, especialmente en áreas como *pre-sales*, los procesos de licitación implican:
+
+- Gestión de múltiples documentos  
+- Revisiones entre distintas áreas  
+- Comunicación constante con clientes externos  
+
+---
+
+## 📊 Volumen de los Procesos
+
+La magnitud del problema se evidencia en el volumen de transacciones:
+
+### 📌 Capacidad Global
+- Entre **450 y 700 procesos de licitación formales al mes**
+
+### ⚙️ Rendimiento por Equipo
+
+- **Con automatización:** 14 a 16 propuestas mensuales  
+- **Con procesos manuales:** 10 a 11 propuestas mensuales  
+
+➡️ Esto evidencia una **brecha significativa de eficiencia**, causada principalmente por el uso de herramientas inadecuadas como el correo electrónico.
+
+---
+
+## 👥 Áreas Involucradas
+
+La construcción de una propuesta es un proceso **multidisciplinario**, que involucra al menos 6 áreas clave:
+
+- **Ventas y Gestión de cuentas:** Definen el contexto y la estrategia del cliente  
+- **Preventa y Arquitectura de Soluciones:** Diseñan la solución técnica  
+- **Gestión de Licitaciones (Bid Management):** Coordina el proceso  
+- **Expertos Técnicos (SMEs):** Aportan conocimiento especializado (IA, Cloud, SAP, etc.)  
+- **Finanzas Comerciales:** Definen precios y modelos financieros  
+- **Jurídico, Cumplimiento y Seguridad:** Validan contratos y requisitos  
+
+---
+
+## ⏱️ Tiempos de Demora y Cuellos de Botella
+
+El principal problema no es solo el trabajo, sino las **latencias entre áreas**:
+
+| Área                          | Tiempo estimado         |
+|------------------------------|-------------------------|
+| Pre-sales (Arquitectura)     | 15 – 25 horas           |
+| SMEs (Expertos técnicos)     | 2 – 5 horas por experto |
+| Finanzas (Pricing)           | 3 – 8 horas             |
+| Seguridad (InfoSec)          | 5 – 10 horas            |
+| Jurídico (Legal Review)      | 1 a 3 semanas           |
+
+### 🚨 Hallazgos clave
+
+- Los **SMEs representan el mayor cuello de botella**  
+  - Entre el **40% y 60% del tiempo total**  
+- La **búsqueda de información** consume entre el **20% y 30% del tiempo total**  
+
+➡️ Gran parte del tiempo se pierde en:
+- Esperas  
+- Reprocesos  
+- Búsqueda de información  
+
+❌ No en generación de valor
+
+---
+
+## 📧 Problemas del Uso del Correo Electrónico
+
+Gran parte de la gestión se realiza a través del correo electrónico, lo que genera:
+
+- Desorden documental  
+- Saturación de bandejas de entrada  
+- Dificultad para clasificar información  
+- Falta de centralización  
+- Baja trazabilidad  
+- Pérdida de visibilidad del estado del proceso  
+
+---
+
+## ⚠️ Impacto en la Operación
+
+Esta situación provoca:
+
+- Mezcla de documentos críticos con información irrelevante  
+- Ausencia de una estructura clara por proceso  
+- Dificultad para identificar responsables  
+- Retrasos por pérdida de información  
+- Imposibilidad de medir tiempos y desempeño  
+
+Además:
+
+- La gestión depende del orden individual de cada colaborador  
+- Aumenta el riesgo de errores y duplicidad de información  
+- Se pierde el control sobre el avance de los procesos  
+- Disminuye la eficiencia operativa (**hasta un 30% del tiempo perdido**)  
+- Se limita la capacidad de respuesta ante el volumen de licitaciones  
+
+---
+
+## 🎯 Problema Central
+
+Se busca resolver la:
+
+- Falta de **centralización**  
+- Falta de **trazabilidad**  
+- Falta de **organización estructurada**  
+
+en la gestión documental y operativa de los procesos de licitación, causada principalmente por el uso del **correo electrónico como herramienta principal**.
+
+
+
 # ADR 001: Selección de Estilo Arquitectónico
 
 ## 📌 Título
@@ -86,7 +202,7 @@ Todos los servicios deben cumplir con:
 
 ## 📝 Notas
 
-- **Autor:** Juan Esteban Acevedo Patiño  
+- **Autor:** Equipo BidFlow 
 - **Versión:** 1.0  
 
 ### 📌 Registro de cambios
