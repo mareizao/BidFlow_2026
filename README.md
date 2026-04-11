@@ -92,3 +92,122 @@ Todos los servicios deben cumplir con:
 ### 📌 Registro de cambios
 
 - **1.0** – Versión inicial del ADR adaptada a la plantilla tipo AWS  
+
+
+# ADR 002: Selección Estructura Interna del Repositorio
+
+## 📌 Título
+**Definición de la estructura interna del repositorio mediante Arquitectura Hexagonal y Domain-Driven Design (DDD) para el sistema BidFlow**
+
+## 📊 Estado
+Aceptada
+
+## 📅 Fecha
+2026-04-10
+
+---
+
+## 🧩 Contexto
+
+El sistema **BidFlow** debe gestionar procesos de licitación complejos que involucran múltiples áreas del negocio, así como un alto volumen de datos y reglas específicas.
+
+Es fundamental evitar la “amnesia organizacional” y garantizar que la lógica de negocio permanezca estable frente a cambios tecnológicos, como:
+
+- Migración entre bases de datos (SQL / NoSQL)  
+- Cambios en APIs externas  
+
+Para lograrlo, se requiere una estructura interna del repositorio que:
+
+- Aísle el núcleo del negocio  
+- Permita evolución independiente de las capas externas  
+- Facilite la mantenibilidad y escalabilidad  
+
+---
+
+## ⚙️ Decisión
+
+Se adopta la **Arquitectura Hexagonal (Puertos y Adaptadores)** junto con patrones tácticos de **Domain-Driven Design (DDD)** para organizar el código dentro de cada microservicio.
+
+### 🧱 Lineamientos de la estructura
+
+- El **modelo de dominio** será el núcleo del sistema  
+  - Sin dependencias de frameworks, librerías externas o infraestructura  
+
+- Se implementará el patrón de **Puertos y Adaptadores**, donde:
+  - **Puertos**: Interfaces o contratos de entrada y salida  
+  - **Adaptadores**: Traductores hacia bases de datos, APIs externas y UI  
+
+- Se aplicará el principio de **Inversión de Dependencias (DIP)**  
+
+- Se utilizarán patrones tácticos de DDD:
+  - Entidades  
+  - Objetos de Valor  
+  - Agregados  
+
+- Los **Repositorios**:
+  - Serán interfaces dentro del dominio  
+  - Actuarán como punto único de acceso a la persistencia  
+
+---
+
+## ❌ Alternativas descartadas
+
+### Arquitectura de 3 Capas Tradicional
+Se descartó debido a:
+
+- Alto acoplamiento entre lógica de negocio y persistencia  
+- Dificultad para evolución tecnológica  
+- Problemas de mantenimiento a largo plazo  
+
+### Desarrollo sin estructura definida
+Se descartó para evitar:
+
+- Desorganización del código  
+- Problemas de escalabilidad  
+- Dificultad de entendimiento para nuevos integrantes  
+
+---
+
+## 📈 Consecuencias
+
+### ✅ Positivas
+
+- Independencia tecnológica  
+- Mejora en mantenibilidad  
+- Facilidad para pruebas unitarias del dominio  
+- Escalabilidad del sistema  
+- Mejor onboarding de nuevos desarrolladores  
+
+### ⚠️ Negativas
+
+- Mayor complejidad inicial  
+- Curva de aprendizaje en:
+  - Arquitectura Hexagonal  
+  - Domain-Driven Design (DDD)  
+
+---
+
+## 📏 Conformidad
+
+El sistema debe cumplir con:
+
+- El dominio **no depende de frameworks externos**  
+- Todas las interacciones con infraestructura se realizan mediante **puertos y adaptadores**  
+- Los repositorios se definen como **interfaces dentro del dominio**  
+- Separación clara entre:
+  - Dominio  
+  - Aplicación  
+  - Infraestructura  
+- Uso de **lenguaje ubicuo** alineado con el negocio  
+  - Ej: *Licitación, SME, Pliegos*  
+
+---
+
+## 📝 Notas
+
+- **Autor:** Equipo BidFlow  
+- **Versión:** 0.1  
+
+### 📌 Registro de cambios
+
+- 0.1 – Versión inicial  
