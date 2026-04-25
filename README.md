@@ -327,3 +327,89 @@ El sistema debe cumplir con:
 ### 📌 Registro de cambios
 
 - 0.1 – Versión inicial  
+
+# ADR 003: Estrategia de Comunicación
+
+## 📌 Título
+Definición de la estrategia de comunicación interna y externa para el ecosistema de microservicios de BidFlow
+
+## 📊 Estado
+**Aceptado**
+
+## 📅 Fecha
+2026-04-24
+
+## 🧩 Contexto
+El sistema BidFlow requiere coordinar procesos entre múltiples microservicios (gestión documental, asignación de tareas, notificaciones) y conectarse con plataformas externas de clientes.
+
+Dado el volumen de 450 a 700 procesos mensuales y la necesidad de manejar cargas simultáneas de documentos pesados, la comunicación debe garantizar baja latencia para el usuario y alta fiabilidad en procesos críticos de cierre de licitaciones.
+
+## ⚙️ Decisión
+
+Se adopta una estrategia de comunicación híbrida basada en los siguientes pilares:
+
+### 🔄 Comunicación Síncrona y Asíncrona
+
+- **Síncrona**: Se utilizará para operaciones que requieren respuesta inmediata, como:
+  - Consulta de tableros de control en tiempo real
+  - Validación de permisos de acceso
+
+- **Asíncrona**: Se implementará para procesos que no requieren respuesta inmediata o son costosos, como:
+  - Envío de notificaciones automáticas
+  - Procesamiento de documentos pesados  
+  *(evita bloqueos en la interfaz)*
+
+---
+
+### 🌐 Tecnología: REST
+
+Se selecciona **REST** como tecnología principal debido a:
+
+- Facilidad de implementación con TypeScript/JavaScript
+- Alta interoperabilidad con sistemas externos
+- Alineación con estándares actuales de la arquitectura
+
+**Alternativas descartadas:**
+
+- **GraphQL / gRPC**: Se descartan para comunicación externa por la necesidad de simplificar integraciones con clientes que usan APIs tradicionales
+- **SOAP**: Descartado por ser rígido y no alineado con la agilidad de microservicios
+
+---
+
+### 📄 Definición de Contratos: OpenAPI
+
+Todos los servicios deben exponer sus contratos mediante **OpenAPI (Swagger)**, lo que permite:
+
+- Interfaces estandarizadas
+- Mejor comunicación entre equipos
+- Integración predecible con sistemas externos
+
+---
+
+## 📈 Consecuencias
+
+### ✅ Positivas
+
+- **Interoperabilidad**: Facilita la integración con herramientas externas mediante contratos claros
+- **Escalabilidad**: La comunicación asíncrona permite manejar picos de tráfico sin degradar la experiencia
+- **Mantenibilidad**: OpenAPI reduce la ambigüedad entre front-end y back-end
+
+### ⚠️ Negativas
+
+- **Gestión de Eventos**: Requiere infraestructura adicional (ej. Message Broker)
+- **Consistencia**: Necesidad de manejar consistencia eventual en procesos asíncronos
+
+---
+
+## 📏 Conformidad
+
+- Cada microservicio debe publicar su documentación en formato OpenAPI
+- Implementar mecanismos de **reintento y recuperación** en comunicación asíncrona
+- Las llamadas síncronas críticas deben responder en **menos de 2 segundos**
+
+---
+
+## 📝 Notas
+
+- **Autor**: Equipo de Arquitectura BidFlow  
+- **Versión**: 1.0
