@@ -7,8 +7,11 @@ export function ThemeProvider({ children }) {
     localStorage.getItem("tema") === "oscuro"
   )
 
-  useEffect(() => {
+useEffect(() => {
     const html = document.documentElement
+    console.log("darkMode cambió a:", darkMode)
+    console.log("Clases antes:", html.classList.toString())
+    
     if (darkMode) {
       html.classList.add("dark")
       localStorage.setItem("tema", "oscuro")
@@ -16,6 +19,8 @@ export function ThemeProvider({ children }) {
       html.classList.remove("dark")
       localStorage.setItem("tema", "claro")
     }
+    
+    console.log("Clases después:", html.classList.toString())
   }, [darkMode])
 
   const toggleDarkMode = () => setDarkMode(!darkMode)
