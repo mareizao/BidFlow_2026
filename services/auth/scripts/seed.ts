@@ -1,7 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS auth;
-CREATE SCHEMA IF NOT EXISTS bid;
-CREATE SCHEMA IF NOT EXISTS doc;
-
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
@@ -73,7 +69,7 @@ async function main() {
     console.log(`   ✅ ${created.rol.padEnd(10)} — ${created.email}`);
   }
 
-  console.log('\n Seed completado. Usuarios creados/actualizados.');
+  console.log('\n🎉 Seed completado. Usuarios creados/actualizados.');
 }
 
 main()
