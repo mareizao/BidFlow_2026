@@ -1,6 +1,6 @@
-import { TareaRepository } from '../../src/domain/repositories/TareaRepository';
-import { LicitacionRepository } from '../../src/domain/repositories/LicitacionRepository';
-import { Tarea } from '../../src/domain/entities/Tarea';
+import { TareaRepository } from '../../domain/repositories/TareaRepository';
+import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
+import { Tarea } from '../../domain/entities/Tarea';
 
 export class CompletarTareaUseCase {
   constructor(

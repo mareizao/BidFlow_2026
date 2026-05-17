@@ -1,8 +1,8 @@
-import { LicitacionRepository } from '../../src/domain/repositories/LicitacionRepository';
-import { TareaRepository } from '../../src/domain/repositories/TareaRepository';
+import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
+import { TareaRepository } from '../../domain/repositories/TareaRepository';
 import { CreateLicitacionDTO, LicitacionResponseDTO } from '../dtos/BidDTOs';
 import { AuthClient } from '../../infrastructure/http/AuthClient';
-import { AreaTarea } from '../../src/domain/entities/Tarea';
+import { AreaTarea } from '../../domain/entities/Tarea';
 
 export class CreateLicitacionUseCase {
   constructor(

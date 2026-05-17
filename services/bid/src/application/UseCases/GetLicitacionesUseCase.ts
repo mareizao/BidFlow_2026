@@ -1,4 +1,4 @@
-import { LicitacionRepository } from '../../src/domain/repositories/LicitacionRepository';
+import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
 import { GetLicitacionesDTO, LicitacionResponseDTO } from '../dtos/BidDTOs';
 
 export class GetLicitacionesUseCase {

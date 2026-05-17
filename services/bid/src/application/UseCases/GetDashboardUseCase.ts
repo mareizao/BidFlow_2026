@@ -1,5 +1,5 @@
-import { LicitacionRepository } from '../../src/domain/repositories/LicitacionRepository';
-import { TareaRepository } from '../../src/domain/repositories/TareaRepository';
+import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
+import { TareaRepository } from '../../domain/repositories/TareaRepository';
 import { DashboardResponseDTO } from '../dtos/BidDTOs';
 
 export class GetDashboardUseCase {
