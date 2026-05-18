@@ -6,15 +6,11 @@ export class GetLicitacionesUseCase {
 
   async execute(
     filters: GetLicitacionesDTO,
-    userId: string,
-    userRol: string,
-    userArea: string
+    visibility: { userId: string; userRol: string; userArea: string }
   ): Promise<{ licitaciones: LicitacionResponseDTO[]; total: number; page: number; limit: number }> {
     const { licitaciones, total } = await this.licitacionRepository.findAll(
       filters,
-      userId,
-      userRol,
-      userArea
+      visibility
     );
 
     const licitacionesConAvance = licitaciones.map((lic) => {

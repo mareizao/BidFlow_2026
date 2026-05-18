@@ -1,4 +1,4 @@
-import { AreaTarea } from '../../src/domain/entities/Tarea';
+import { AreaTarea } from '../../domain/entities/Tarea';
 
 // Request DTOs
 export interface CreateLicitacionDTO {

@@ -1,6 +1,7 @@
 import prisma from './prismaClient';
-import { LicitacionRepository, LicitacionFilters } from '../../src/domain/repositories/LicitacionRepository';
-import { Licitacion } from '../../src/domain/entities/Licitacion';
+import { LicitacionRepository, LicitacionFilters } from '../../domain/repositories/LicitacionRepository';
+import { Licitacion } from '../../domain/entities/Licitacion';
+import { Tarea } from '../../domain/entities/Tarea';
 
 export class PrismaLicitacionRepository implements LicitacionRepository {
   async save(licitacion: Omit<Licitacion, 'id' | 'createdAt' | 'updatedAt' | 'tareas'>): Promise<Licitacion> {
@@ -26,10 +27,9 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
 
   async findAll(
     filters: LicitacionFilters,
-    userId: string,
-    userRol: string,
-    userArea: string
+    visibility: import('../../domain/repositories/LicitacionRepository').VisibilityContext
   ): Promise<{ licitaciones: Licitacion[]; total: number }> {
+    const { userId, userRol, userArea } = visibility;
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
@@ -63,6 +63,45 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
     ]);
 
     return { licitaciones: licitaciones as Licitacion[], total };
+  }
+
+  async saveWithTareas(
+    licitacion: Omit<Licitacion, 'id' | 'createdAt' | 'updatedAt' | 'tareas'>,
+    tareas: Omit<Tarea, 'id' | 'createdAt'>[],
+  ): Promise<Licitacion & { tareas: Tarea[] }> {
+    return prisma.$transaction(async (tx) => {
+
+      const created = await tx.licitacion.create({
+        data: {
+          titulo: licitacion.titulo,
+          cliente: licitacion.cliente,
+          estado: licitacion.estado,
+          fechaCierre: licitacion.fechaCierre,
+          createdBy: licitacion.createdBy,
+        },
+      });
+
+      const createdTareas = await tx.tarea.createMany({
+        data: tareas.map((t) => ({
+          licitacionId: created.id,
+          area: t.area,
+          responsableId: t.responsableId,
+          estado: t.estado,
+          horasEstimadas: t.horasEstimadas,
+          completadaAt: t.completadaAt,
+        })),
+      });
+
+      // createMany no devuelve entidades; las recuperamos
+      const tareasRecuperadas = await tx.tarea.findMany({
+        where: { licitacionId: created.id },
+      });
+
+      return {
+        ...(created as Licitacion),
+        tareas: tareasRecuperadas as unknown as Tarea[],
+      } as Licitacion & { tareas: Tarea[] };
+    });
   }
 
   async update(id: string, data: Partial<Licitacion>): Promise<Licitacion> {

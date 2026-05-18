@@ -57,9 +57,11 @@ export class BidController {
           page: page ? parseInt(page as string) : 1,
           limit: limit ? parseInt(limit as string) : 10,
         },
-        req.user!.id,
-        req.user!.rol,
-        req.user!.area
+        {
+          userId: req.user!.id,
+          userRol: req.user!.rol,
+          userArea: req.user!.area,
+        }
       );
 
       res.status(200).json(result);
@@ -111,11 +113,11 @@ export class BidController {
     try {
       const { userId } = req.params;
 
-      const result = await getDashboardUseCase.execute(
+      const result = await getDashboardUseCase.execute({
         userId,
-        req.user!.rol,
-        req.user!.area
-      );
+        userRol: req.user!.rol,
+        userArea: req.user!.area,
+      });
 
       res.status(200).json(result);
     } catch (error: any) {

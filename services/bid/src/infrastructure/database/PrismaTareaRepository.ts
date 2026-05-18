@@ -1,6 +1,6 @@
 import prisma from './prismaClient';
-import { TareaRepository } from '../../src/domain/repositories/TareaRepository';
-import { Tarea } from '../../src/domain/entities/Tarea';
+import { TareaRepository } from '../../domain/repositories/TareaRepository';
+import { Tarea } from '../../domain/entities/Tarea';
 
 export class PrismaTareaRepository implements TareaRepository {
   async save(tarea: Omit<Tarea, 'id' | 'createdAt'>): Promise<Tarea> {

@@ -1,45 +1,52 @@
-import { TareaRepository } from '../../domain/repositories/TareaRepository';
-import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
-import { Tarea } from '../../domain/entities/Tarea';
+import { TareaRepository } from "../../domain/repositories/TareaRepository";
+import { LicitacionRepository } from "../../domain/repositories/LicitacionRepository";
+import { Tarea } from "../../domain/entities/Tarea";
 
 export class CompletarTareaUseCase {
   constructor(
     private tareaRepository: TareaRepository,
-    private licitacionRepository: LicitacionRepository
+    private licitacionRepository: LicitacionRepository,
   ) {}
 
-  async execute(tareaId: string, userId: string): Promise<{
+  async execute(
+    tareaId: string,
+    userId: string,
+  ): Promise<{
     tarea: Tarea;
     licitacionActualizada: { estado: string; porcentajeAvance: number };
   }> {
-    // 1. Buscar la tarea
     const tarea = await this.tareaRepository.findById(tareaId);
-    if (!tarea) throw new Error('Tarea no encontrada');
+    if (!tarea) throw new Error("Tarea no encontrada");
 
-    // 2. Validar que el usuario es el responsable
     if (tarea.responsableId !== userId) {
-      throw new Error('No tienes permiso para completar esta tarea');
+      throw new Error("No tienes permiso para completar esta tarea");
     }
 
-    // 3. Completar la tarea
     const tareaActualizada = await this.tareaRepository.update(tareaId, {
-      estado: 'completada',
+      estado: "completada",
       completadaAt: new Date(),
     });
 
-    // 4. Verificar si todas las tareas están completas
-    const todasTareas = await this.tareaRepository.findByLicitacionId(tarea.licitacionId);
-    const todasCompletadas = todasTareas.every((t) =>
-      t.id === tareaId ? true : t.estado === 'completada'
+    // Traer todas las tareas y reemplazar la actualizada con el objeto en memoria
+    const todasTareas = await this.tareaRepository.findByLicitacionId(
+      tarea.licitacionId,
     );
 
-    const completadas = todasTareas.filter((t) =>
-      t.id === tareaId ? true : t.estado === 'completada'
-    ).length;
-    const porcentajeAvance = Math.round((completadas / todasTareas.length) * 100);
+    const tareasConEstadoReal = todasTareas.map((t) =>
+      t.id === tareaId ? tareaActualizada : t,
+    );
 
-    // 5. Actualizar estado de licitación si corresponde
-    const nuevoEstado = todasCompletadas ? 'aprobada' : 'en_revision';
+    const completadas = tareasConEstadoReal.filter(
+      (t) => t.estado === "completada",
+    ).length;
+
+    const todasCompletadas = completadas === tareasConEstadoReal.length;
+    const porcentajeAvance = Math.round(
+      (completadas / tareasConEstadoReal.length) * 100,
+    );
+
+    const nuevoEstado = todasCompletadas ? "aprobada" : "en_revision";
+
     await this.licitacionRepository.update(tarea.licitacionId, {
       estado: nuevoEstado,
     });

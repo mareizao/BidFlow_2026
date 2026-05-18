@@ -12,7 +12,6 @@ export class CreateLicitacionUseCase {
   ) {}
 
   async execute(dto: CreateLicitacionDTO, userId: string): Promise<LicitacionResponseDTO> {
-    // 1. Crear la licitación
     const licitacion = await this.licitacionRepository.save({
       titulo: dto.titulo,
       cliente: dto.cliente,
@@ -21,29 +20,39 @@ export class CreateLicitacionUseCase {
       createdBy: userId,
     });
 
-    // 2. Crear tareas automáticas por cada área
-    const tareas = [];
-    for (const area of dto.areas) {
-      // Buscar responsable por área/rol
-      let responsableId = userId; // fallback
-      try {
-        const usuarios = await this.authClient.getUsersByRol(area.toLowerCase());
-        if (usuarios && usuarios.length > 0) {
-          responsableId = usuarios[0].id;
+    // 1) Resolver responsables en paralelo (ADR 6)
+    const responsablesPromise = Promise.all(
+      dto.areas.map(async (area) => {
+        try {
+          const usuarios = await this.authClient.getUsersByRol(area.toLowerCase());
+          return usuarios?.length > 0 ? usuarios[0].id : userId;
+        } catch {
+          return userId;
         }
-      } catch (error) {
-        console.warn(`No se pudo obtener usuario para área ${area}, usando creador`);
-      }
+      })
+    );
 
-      const tarea = await this.tareaRepository.save({
-        licitacionId: licitacion.id,
-        area: area as AreaTarea,
-        responsableId,
-        estado: 'pendiente',
-        horasEstimadas: 0,
-        completadaAt: null,
-      });
-      tareas.push(tarea);
+    // 2) Crear tareas en paralelo (pero con responsables resueltos)
+    //    Usamos una Promise.all independiente para cumplir la estructura del ADR.
+    let tareas: any[];
+    try {
+      const [responsables] = await Promise.all([responsablesPromise]);
+
+      tareas = await Promise.all(
+        dto.areas.map((area, i) =>
+          this.tareaRepository.save({
+            licitacionId: licitacion.id,
+            area: area as AreaTarea,
+            responsableId: responsables[i],
+            estado: 'pendiente',
+            horasEstimadas: 0,
+            completadaAt: null,
+          })
+        )
+      );
+    } catch (error) {
+      await this.licitacionRepository.delete(licitacion.id);
+      throw new Error('No se pudieron crear las tareas de la licitación');
     }
 
     return {

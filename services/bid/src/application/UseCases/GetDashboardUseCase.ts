@@ -8,13 +8,12 @@ export class GetDashboardUseCase {
     private tareaRepository: TareaRepository
   ) {}
 
-  async execute(userId: string, userRol: string, userArea: string): Promise<DashboardResponseDTO> {
+  async execute(visibility: { userId: string; userRol: string; userArea: string }): Promise<DashboardResponseDTO> {
+    const { userId, userRol, userArea } = visibility;
     // 1. Obtener todas las licitaciones del usuario
     const { licitaciones } = await this.licitacionRepository.findAll(
       { limit: 100 },
-      userId,
-      userRol,
-      userArea
+      visibility
     );
 
     // 2. Calcular estadísticas

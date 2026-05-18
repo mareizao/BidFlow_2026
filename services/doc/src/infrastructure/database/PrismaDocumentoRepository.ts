@@ -53,7 +53,7 @@ export class PrismaDocumentoRepository implements DocumentoRepository {
     });
 
     return docs.map(
-      (d) =>
+      (d: any) =>
         new Documento(
           d.id,
           d.filename,

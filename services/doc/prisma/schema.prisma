@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
@@ -7,3 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
   schemas  = ["doc"]
 }
+
+model Documento {
+  id           String   @id
+  filename     String
+  storageKey   String
+  fileSize     Int
+  mimeType     String
+  licitacionId String
+  uploadedBy   String
+  uploadedAt   DateTime @default(now())
+
+  @@map("documentos")
+  @@schema("doc")
+}
+
