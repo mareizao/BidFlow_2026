@@ -1,10 +1,10 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { CreateLicitacionUseCase } from '../../application/tempCases/CreateLicitacionUseCase';
-import { GetLicitacionesUseCase } from '../../application/tempCases/GetLicitacionesUseCase';
-import { GetLicitacionByIdUseCase } from '../../application/tempCases/GetLicitacionByIdUseCase';
-import { CompletarTareaUseCase } from '../../application/tempCases/CompletarTareaUseCase';
-import { GetDashboardUseCase } from '../../application/tempCases/GetDashboardUseCase';
+import { CreateLicitacionUseCase } from '../../application/useCases/CreateLicitacionUseCase';
+import { GetLicitacionesUseCase } from '../../application/useCases/GetLicitacionesUseCase';
+import { GetLicitacionByIdUseCase } from '../../application/useCases/GetLicitacionByIdUseCase';
+import { CompletarTareaUseCase } from '../../application/useCases/CompletarTareaUseCase';
+import { GetDashboardUseCase } from '../../application/useCases/GetDashboardUseCase';
 import { PrismaLicitacionRepository } from '../../infrastructure/database/PrismaLicitacionRepository';
 import { PrismaTareaRepository } from '../../infrastructure/database/PrismaTareaRepository';
 import { authClient } from '../../infrastructure/http/AuthClient';
