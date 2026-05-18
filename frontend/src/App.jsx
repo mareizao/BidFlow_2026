@@ -1,27 +1,44 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { ThemeProvider } from "./context/ThemeContext"
+// src/App.jsx
+import { Routes, Route, Navigate } from "react-router-dom"
+import { useAuth } from "./contexts/AuthContext"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
-import DetalleLicitacion from "./pages/DetalleLicitacion"
+import LicitacionDetalle from "./pages/LicitacionDetalle"
 import CrearLicitacion from "./pages/CrearLicitacion"
 
-const RutaProtegida = ({ children }) => {
-  const token = localStorage.getItem("token")
-  return token ? children : <Navigate to="/login" />
+// Componente para rutas protegidas
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, cargando } = useAuth()
+  
+  if (cargando) {
+    return <div className="flex justify-center items-center h-screen">Cargando...</div>
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
-export default function App() {
+function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<RutaProtegida><Dashboard /></RutaProtegida>} />
-          <Route path="/licitacion/:id" element={<RutaProtegida><DetalleLicitacion /></RutaProtegida>} />
-          <Route path="/crear" element={<RutaProtegida><CrearLicitacion /></RutaProtegida>} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/licitacion/:id" element={
+        <ProtectedRoute>
+          <LicitacionDetalle />
+        </ProtectedRoute>
+      } />
+      <Route path="/crear" element={
+        <ProtectedRoute>
+          <CrearLicitacion />
+        </ProtectedRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
+
+export default App

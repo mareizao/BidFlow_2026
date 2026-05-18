@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { loginApi } from "../api/authApi"
 
 export default function Login() {
   const navigate = useNavigate()
@@ -13,13 +14,21 @@ export default function Login() {
     setError("")
     setCargando(true)
 
-    await new Promise((r) => setTimeout(r, 800))
+    // Validación básica
+    if (!email || !password) {
+      setError("Por favor ingresa email y contraseña.")
+      setCargando(false)
+      return
+    }
 
-    if (email && password) {
-      localStorage.setItem("token", "mock-jwt-token-bidflow")
+    // Login real con backend
+    const result = await loginApi(email, password)
+
+    if (result.success) {
+      // Redirigir al dashboard
       navigate("/")
     } else {
-      setError("Por favor ingresa email y contraseña.")
+      setError(result.error || "Credenciales inválidas. Por favor intenta nuevamente.")
     }
 
     setCargando(false)
@@ -28,7 +37,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-10 w-full max-w-md">
-
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-black tracking-tighter text-primary dark:text-blue-400 mb-1">
             BidFlow
@@ -49,6 +57,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded text-sm outline-none focus:border-primary transition-colors"
               placeholder="usuario@globant.com"
+              required
             />
           </div>
 
@@ -62,6 +71,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded text-sm outline-none focus:border-primary transition-colors"
               placeholder="••••••••"
+              required
             />
           </div>
 
@@ -79,6 +89,18 @@ export default function Login() {
             {cargando ? "Ingresando..." : "Iniciar Sesión"}
           </button>
         </form>
+
+        {/* Usuarios de prueba (solo para desarrollo) */}
+        {import.meta.env.DEV && (
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-400 mb-2">Usuarios de prueba:</p>
+            <div className="space-y-1 text-xs text-gray-500">
+              <p>📧 admin@bidflow.com / admin123</p>
+              <p>📧 presales@bidflow.com / presales123</p>
+              <p>📧 sme@bidflow.com / sme123</p>
+            </div>
+          </div>
+        )}
 
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-6">
           BidFlow © 2026 — Arquitectura de Software
