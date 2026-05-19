@@ -2,7 +2,7 @@ import { docClient, docUploadClient } from "./axiosConfig"
 
 const USAR_MOCK = false
 
-// Subir documento
+// Subir documento ✅ (esta ya estaba correcta)
 export const uploadDocumento = async (archivo, licitacionId, metadata = {}) => {
   if (USAR_MOCK) {
     console.log("Mock: subiendo archivo", archivo.name, "para", licitacionId)
@@ -18,12 +18,11 @@ export const uploadDocumento = async (archivo, licitacionId, metadata = {}) => {
   try {
     const formData = new FormData()
     formData.append("file", archivo)
-    formData.append("tenderId", licitacionId)
+    formData.append("licitacionId", licitacionId) // ✅ Cambiado de "tenderId" a "licitacionId"
     
     if (metadata.type) formData.append("type", metadata.type)
     if (metadata.category) formData.append("category", metadata.category)
     
-    // Ruta según tu doc-svc
     const res = await docUploadClient.post("/upload", formData)
     return res.data?.data || res.data
   } catch (error) {
@@ -32,10 +31,11 @@ export const uploadDocumento = async (archivo, licitacionId, metadata = {}) => {
   }
 }
 
-// Obtener documentos de una licitación
+// Obtener documentos de una licitación ✅ CORREGIDO
 export const getDocumentosByLicitacion = async (licitacionId) => {
   try {
-    const res = await docClient.get(`/documents/tender/${licitacionId}`)
+    // ✅ Ruta correcta: /licitacion/:licitacionId
+    const res = await docClient.get(`/licitacion/${licitacionId}`)
     return res.data?.data || res.data || []
   } catch (error) {
     console.error(`Error obteniendo documentos de licitación ${licitacionId}:`, error)
@@ -43,18 +43,18 @@ export const getDocumentosByLicitacion = async (licitacionId) => {
   }
 }
 
-// Obtener documento por ID
+// ⚠️ getDocumentoById: Tu backend NO tiene esta ruta
+// Opción A: Eliminar esta función si no la usas
+// Opción B: Implementarla en el backend si la necesitas
 export const getDocumentoById = async (docId) => {
-  try {
-    const res = await docClient.get(`/documents/${docId}`)
-    return res.data?.data || res.data
-  } catch (error) {
-    console.error(`Error obteniendo documento ${docId}:`, error)
-    throw error
-  }
+  console.warn("getDocumentoById: Esta ruta no existe en el backend actual")
+  // Si tu backend la tuviera, sería algo como:
+  // const res = await docClient.get(`/documento/${docId}`)
+  // return res.data?.data || res.data
+  throw new Error("Ruta no implementada en doc-svc")
 }
 
-// Descargar documento
+// Descargar documento ✅ CORREGIDO
 export const downloadDocumento = async (docId, nombreArchivo) => {
   if (USAR_MOCK) {
     console.log("Mock: descargando documento", docId)
@@ -62,11 +62,11 @@ export const downloadDocumento = async (docId, nombreArchivo) => {
   }
   
   try {
-    const res = await docClient.get(`/documents/${docId}/download`, {
+    // ✅ Ruta correcta: /download/:id
+    const res = await docClient.get(`/download/${docId}`, {
       responseType: "blob",
     })
     
-    // Crear link de descarga
     const blob = new Blob([res.data], { type: res.headers["content-type"] })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -84,10 +84,11 @@ export const downloadDocumento = async (docId, nombreArchivo) => {
   }
 }
 
-// Eliminar documento
+// Eliminar documento ✅ CORREGIDO
 export const eliminarDocumento = async (docId) => {
   try {
-    await docClient.delete(`/documents/${docId}`)
+    // ✅ Ruta correcta: /documento/:id
+    await docClient.delete(`/documento/${docId}`)
     return { success: true }
   } catch (error) {
     console.error(`Error eliminando documento ${docId}:`, error)
