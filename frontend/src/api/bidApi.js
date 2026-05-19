@@ -135,18 +135,25 @@ export const getTareasPendientes = async (limit = 5) => {
     const usuario = usuarioStr ? JSON.parse(usuarioStr) : null
     
     if (!usuario?.id) return []
-    
+
     // ✅ Usar el endpoint /dashboard que ya incluye tareasAsignadas
     const res = await bidClient.get(`/dashboard/${usuario.id}`)
     const data = res.data || res.data?.data || {}
-    
-    // Backend devuelve: { tareasAsignadas: [...] }
+
+    // Backend devuelve: { tareasAsignadas: [{ id, licitacionTitulo, area, estado }] }
     const tareas = data.tareasAsignadas || data.tareas || []
-    
-    // Filtrar solo las pendientes y limitar
+
+    // ✅ Filtrar solo las pendientes y adaptar campos
     return tareas
       .filter((t) => t.estado === "pendiente" || t.status === "pending")
       .slice(0, limit)
+      .map((t) => ({
+        id: t.id,
+        titulo: t.licitacionTitulo || `Tarea ${t.area}`,  // ← Usar licitacionTitulo
+        descripcion: `Área: ${t.area}`,  // ← Crear descripción desde area
+        area: t.area,
+        estado: t.estado,
+      }))
   } catch (error) {
     console.error("Error obteniendo tareas:", error)
     return []
