@@ -2,7 +2,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import { PrismaClient } from "@prisma/client";
-import crypto from 'crypto';
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +36,6 @@ export class DocController {
           fileSize: fileSizeNum, // ✅ Ahora es un Int válido
           mimeType,
           uploadedBy: req.user!.id,
-          // ✅ NO incluir id si tu schema tiene @default(uuid())
         },
       });
 
