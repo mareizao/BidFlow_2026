@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { useAuth } from "./context/AuthContext"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
-import LicitacionDetalle from "./pages/LicitacionDetalle"
+import LicitacionDetalle from "./pages/DetalleLicitacion"
 import CrearLicitacion from "./pages/CrearLicitacion"
 
 // Componente para rutas protegidas
