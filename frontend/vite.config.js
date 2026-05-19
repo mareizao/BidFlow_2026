@@ -11,12 +11,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Eliminar console.log en producción
-        drop_debugger: true
-      }
-    },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -27,6 +21,7 @@ export default defineConfig({
     }
   },
   preview: {
-    port: 3000
+    port: 3000,
+    host: true
   }
 })
