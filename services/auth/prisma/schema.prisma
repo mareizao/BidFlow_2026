@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth"]
 }
 
 model User {
@@ -18,9 +17,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // 👈 CORREGIDO: La tabla se llama "users" (minúscula, plural)
   @@map("users")
-  @@schema("auth")
 }
 
 enum Rol {
@@ -29,6 +26,4 @@ enum Rol {
   sme
   finanzas
   juridico
-  
-  @@schema("auth")
 }
