@@ -10,7 +10,7 @@ datasource db {
 }
 
 model Documento {
-  id           String   @id
+  id           String   @id @default(uuid())
   filename     String
   storageKey   String
   fileSize     Int

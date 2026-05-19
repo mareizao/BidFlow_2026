@@ -1,106 +1,39 @@
+// services/doc/src/controllers/DocController.ts
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
-import { UploadDocumentUseCase } from '../../application/useCases/UploadDocumentUseCase';
-import { DownloadDocumentUseCase } from '../../application/useCases/DownloadDocumentUseCase';
-import { GetDocumentsByLicitacionUseCase } from '../../application/useCases/GetDocumentsByLicitacionUseCase';
-import { DeleteDocumentUseCase } from '../../application/useCases/DeleteDocumentUseCase';
-import { PrismaDocumentoRepository } from '../../infrastructure/database/PrismaDocumentoRepository';
-import { LocalFileStorage } from '../../infrastructure/storage/LocalFileStorage';
+import { PrismaClient } from '@prisma/client';
 
-const repository = new PrismaDocumentoRepository();
-const fileStorage = new LocalFileStorage();
-
-const uploadUseCase = new UploadDocumentUseCase(repository);
-const downloadUseCase = new DownloadDocumentUseCase(repository, fileStorage);
-const getByLicitacionUseCase = new GetDocumentsByLicitacionUseCase(repository);
-const deleteUseCase = new DeleteDocumentUseCase(repository, fileStorage);
+const prisma = new PrismaClient();
 
 export class DocController {
   async upload(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const file = req.file;
+      const { licitacionId, filename, mimeType, fileSize, storageKey } = req.body;
 
-      if (!file) {
-        res.status(400).json({ error: 'No se recibió ningún archivo' });
+      if (!file || !licitacionId || !storageKey) {
+        res.status(400).json({ error: 'Archivo, licitacionId y metadatos son requeridos' });
         return;
       }
 
-      const { licitacionId, storageKey } = req.body;
-
-      if (!licitacionId) {
-        res.status(400).json({ error: 'licitacionId es requerido' });
-        return;
-      }
-
-      
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(licitacionId)) {
-        res.status(400).json({ error: 'licitacionId debe ser un UUID válido' });
-        return;
-      }
-
-      const result = await uploadUseCase.execute({
-        filename: file.originalname,
-        storageKey: storageKey || file.filename,
-        fileSize: file.size,
-        mimeType: file.mimetype,
-        licitacionId,
-        uploadedBy: req.user!.id,
+      // ✅ Prisma generará el id automáticamente gracias a @default(uuid())
+      const docRecord = await prisma.documento.create({
+        data: {
+          id: crypto.randomUUID(),
+          licitacionId,
+          filename,
+          storageKey,
+          fileSize: Number(fileSize),
+          mimeType,
+          uploadedBy: req.user!.id,
+          // ✅ NO incluir id: Prisma lo genera solo
+        },
       });
 
-      res.status(201).json(result);
+      res.status(201).json({ success: true, data: docRecord });
     } catch (error: any) {
-      if (error.message === 'Archivo demasiado grande. Máximo 50MB') {
-        res.status(400).json({ error: error.message });
-        return;
-      }
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  }
-
-  async download(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { documento, stream } = await downloadUseCase.execute(id);
-
-      res.setHeader('Content-Type', documento.mimeType);
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${encodeURIComponent(documento.filename)}"`
-      );
-      res.setHeader('Content-Length', documento.fileSize);
-
-      stream.pipe(res);
-    } catch (error: any) {
-      if (error.message === 'Documento no encontrado') {
-        res.status(404).json({ error: 'Documento no encontrado' });
-        return;
-      }
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  }
-
-  async getByLicitacion(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { licitacionId } = req.params;
-      const result = await getByLicitacionUseCase.execute(licitacionId);
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  }
-
-  async deleteDocumento(req: AuthenticatedRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      await deleteUseCase.execute(id);
-      res.status(204).send();
-    } catch (error: any) {
-      if (error.message === 'Documento no encontrado') {
-        res.status(404).json({ error: 'Documento no encontrado' });
-        return;
-      }
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('[DocController.upload]', error);
+      res.status(500).json({ error: error.message || 'Error interno al guardar documento' });
     }
   }
 }
