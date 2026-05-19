@@ -9,16 +9,23 @@ export const loginApi = async (email, password) => {
     // { token: "jwt-token", user: { id, email, role, name } }
     if (response.data?.token) {
       localStorage.setItem("token", response.data.token)
-      localStorage.setItem("usuario", JSON.stringify(response.data.user))
-      return { 
-        success: true, 
-        data: response.data,
-        usuario: response.data.user 
+      
+      // ✅ Asegurar que se guarda el usuario con los campos en español
+      const user = response.data.user || response.data.usuario
+      const usuarioNormalizado = {
+        id: user?.id,
+        email: user?.email,
+        nombre: user?.nombre || user?.name,  // Soportar ambos
+        rol: user?.rol || user?.role,        // Soportar ambos
+        area: user?.area,
       }
+      
+      console.log("👤 Usuario normalizado:", usuarioNormalizado) // ← Log temporal para debug
+      localStorage.setItem("usuario", JSON.stringify(usuarioNormalizado))
+      
+      return { success: true, data: response.data, usuario: usuarioNormalizado }
     }
-    
-    return { success: false, error: "Respuesta inválida del servidor" }
-  } catch (error) {
+  }catch (error) {
     console.error("Error en login:", error)
     return { 
       success: false, 

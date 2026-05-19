@@ -11,13 +11,25 @@ export const getLicitaciones = async (params = {}) => {
   }
   
   try {
-    // ✅ Ruta correcta: /licitaciones
-    const res = await bidClient.get("/licitaciones", { params })
+    // ✅ CORRECCIÓN: Eliminar 'sort' y sanitizar params
+    const { estado, page, limit } = params
+    const safeParams = {}
+    
+    if (estado) safeParams.estado = estado
+    if (page) safeParams.page = parseInt(page, 10)
+    if (limit) safeParams.limit = parseInt(limit, 10)
+    
+    // ✅ Solo enviar params que el backend espera
+    const res = await bidClient.get("/licitaciones", { params: safeParams })
     
     // Backend devuelve: { licitaciones: [...], total, page, limit }
     return res.data?.licitaciones || res.data?.data || res.data || []
   } catch (error) {
-    console.error("Error obteniendo licitaciones:", error)
+    console.error("Error obteniendo licitaciones:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    })
     throw error
   }
 }

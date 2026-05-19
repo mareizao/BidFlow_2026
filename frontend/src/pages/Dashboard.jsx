@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
@@ -5,18 +6,31 @@ import Sidebar from "../components/Sidebar"
 import { getLicitaciones, getDashboardStats, getTareasPendientes } from "../api/bidApi"
 import { useAuth } from "../context/AuthContext"
 
+// Badge de estado - soporta nombres en español e inglés
 const badgeEstado = (estado) => {
-  // Normalizar estado para comparación
   const estadoLower = (estado || "").toLowerCase()
   
-  if (estadoLower === "abierta" || estadoLower === "active" || estadoLower === "open") 
+  if (["abierta", "active", "open", "borrador", "en_revision", "en revisión"].includes(estadoLower)) 
     return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-  if (estadoLower === "en revisión" || estadoLower === "review" || estadoLower === "pending") 
+  if (["en revisión", "review", "pending", "en_revision"].includes(estadoLower)) 
     return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-  if (estadoLower === "cerrada" || estadoLower === "closed" || estadoLower === "completed") 
+  if (["cerrada", "closed", "completed", "aprobada"].includes(estadoLower)) 
     return "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
   
   return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+}
+
+// Adaptador: convierte stats del backend al formato del frontend
+const adaptarStats = (backendStats) => {
+  if (!backendStats) return { total: 0, abiertas: 0, enRevision: 0, cerradas: 0 }
+  
+  const stats = backendStats.estadisticas || backendStats
+  return {
+    total: stats.totalLicitaciones || stats.total || 0,
+    abiertas: stats.activas || stats.open || stats.abiertas || 0,  // Backend: "activas"
+    enRevision: stats.enRevision || stats.review || 0,
+    cerradas: stats.completadas || stats.closed || stats.cerradas || 0,  // Backend: "completadas"
+  }
 }
 
 export default function Dashboard() {
@@ -31,13 +45,13 @@ export default function Dashboard() {
     const cargarDatos = async () => {
       setCargando(true)
       try {
-        // Cargar licitaciones
-        const licitacionesData = await getLicitaciones({ limit: 10, sort: "-createdAt" })
+        // ✅ CORRECCIÓN: Eliminar 'sort' - el backend no lo espera (causaba error 400)
+        const licitacionesData = await getLicitaciones({ limit: 10 })
         setLicitaciones(licitacionesData)
         
-        // Cargar estadísticas
-        const statsData = await getDashboardStats()
-        setStats(statsData)
+        // Cargar y adaptar estadísticas
+        const statsBackend = await getDashboardStats()
+        setStats(adaptarStats(statsBackend))
         
         // Cargar tareas pendientes
         const tareasData = await getTareasPendientes(5)
@@ -52,17 +66,11 @@ export default function Dashboard() {
     cargarDatos()
   }, [])
 
-  // Calcular stats si no vienen del backend
+  // Calcular stats con fallback si no vienen adaptados
   const totalLicitaciones = stats?.total || licitaciones.length
-  const abiertas = stats?.abiertas || licitaciones.filter(l => 
-    l.estado === "Abierta" || l.status === "active" || l.status === "open"
-  ).length
-  const enRevision = stats?.enRevision || licitaciones.filter(l => 
-    l.estado === "En Revisión" || l.status === "review" || l.status === "pending"
-  ).length
-  const cerradas = stats?.cerradas || licitaciones.filter(l => 
-    l.estado === "Cerrada" || l.status === "closed" || l.status === "completed"
-  ).length
+  const abiertas = stats?.abiertas || 0
+  const enRevision = stats?.enRevision || 0
+  const cerradas = stats?.cerradas || 0
 
   const statsCards = [
     { label: "Total", valor: totalLicitaciones, color: "text-slate-900 dark:text-white" },
@@ -71,18 +79,24 @@ export default function Dashboard() {
     { label: "Cerradas", valor: cerradas, color: "text-gray-500 dark:text-gray-400" },
   ]
 
+  // Helper para obtener nombre del usuario (soporta español/inglés)
+  const nombreUsuario = usuario?.nombre || usuario?.name || usuario?.email || "Usuario"
+  const rolUsuario = usuario?.rol || usuario?.role || "No especificado"
+  const areaUsuario = usuario?.area ? ` — ${usuario.area}` : ""
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-800 transition-colors duration-300">
       <Navbar />
       <Sidebar />
       <main className="ml-56 pt-16 p-8">
-        {/* Bienvenida personalizada */}
+        
+        {/* ✅ Bienvenida con nombres en español/inglés */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Bienvenido, {usuario?.name || usuario?.email || "Usuario"}
+            Bienvenido, {nombreUsuario}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Rol: {usuario?.role || "No especificado"}
+            Rol: {rolUsuario}{areaUsuario}
           </p>
         </div>
 
@@ -124,15 +138,18 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-sm font-medium text-slate-900 dark:text-white">
-                        {tarea.title || tarea.nombre}
+                        {/* ✅ Soporta title/nombre y description/descripción */}
+                        {tarea.titulo || tarea.title || tarea.nombre || "Sin título"}
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {tarea.description || tarea.descripcion}
+                        {tarea.descripcion || tarea.description || "Sin descripción"}
                       </p>
                     </div>
                     <div className="text-xs text-gray-500">
-                      {tarea.dueDate && (
-                        <span>Vence: {new Date(tarea.dueDate).toLocaleDateString()}</span>
+                      {tarea.fechaVencimiento || tarea.dueDate ? (
+                        <span>Vence: {new Date(tarea.fechaVencimiento || tarea.dueDate).toLocaleDateString()}</span>
+                      ) : (
+                        <span className="text-gray-400">Sin fecha</span>
                       )}
                     </div>
                   </div>
@@ -184,10 +201,11 @@ export default function Dashboard() {
                       }`}
                     >
                       <td className="py-4 px-6 font-mono text-xs text-gray-500 dark:text-gray-400">
-                        {lic.id || lic.bidId}
+                        {lic.id || lic.bidId || "N/A"}
                       </td>
                       <td className="py-4 px-6 font-medium text-slate-800 dark:text-white">
-                        {lic.title || lic.nombre}
+                        {/* ✅ Soporta titulo/nombre */}
+                        {lic.titulo || lic.title || lic.nombre || "Sin título"}
                       </td>
                       <td className="py-4 px-6">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeEstado(lic.estado || lic.status)}`}>
@@ -195,23 +213,23 @@ export default function Dashboard() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-gray-500 dark:text-gray-400">
-                        {lic.sme || lic.assignedTo || "No asignado"}
+                        {lic.sme || lic.assignedTo || lic.responsable || "No asignado"}
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div 
                               className="bg-primary dark:bg-blue-500 h-2 rounded-full" 
-                              style={{ width: `${lic.progreso || lic.progress || 0}%` }} 
+                              style={{ width: `${lic.porcentajeAvance || lic.progreso || lic.progress || 0}%` }} 
                             />
                           </div>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {lic.progreso || lic.progress || 0}%
+                            {lic.porcentajeAvance || lic.progreso || lic.progress || 0}%
                           </span>
                         </div>
                       </td>
                       <td className="py-4 px-6 text-gray-500 dark:text-gray-400">
-                        {lic.fecha || (lic.updatedAt && new Date(lic.updatedAt).toLocaleDateString()) || "N/A"}
+                        {lic.fechaCierre || lic.fecha || (lic.updatedAt && new Date(lic.updatedAt).toLocaleDateString()) || "N/A"}
                       </td>
                     </tr>
                   ))}

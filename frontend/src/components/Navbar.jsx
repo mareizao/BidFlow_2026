@@ -1,19 +1,26 @@
+// src/components/Navbar.jsx
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 
 export default function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme()
-  const { logout } = useAuth()  // ← Extraer del contexto
-  const navigate = useNavigate()  // ← Usar navigate de React Router
+  const { usuario, logout } = useAuth()  // ← Extraer usuario + logout
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout()  // Limpia localStorage + contexto Auth
-    navigate("/login", { replace: true })  // Navegación correcta
+    logout()
+    navigate("/login", { replace: true })
   }
+
+  // ✅ Obtener datos del usuario con fallback seguro (soporta nombres en español/inglés)
+  const nombre = usuario?.nombre || usuario?.name || usuario?.email || "Usuario"
+  const inicial = nombre.charAt(0).toUpperCase()
+  const rol = usuario?.rol || usuario?.role || "Sin rol"
+
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center h-16 px-6 w-full fixed top-0 z-40 transition-colors duration-300">
-
+      
       <img
         src="/logo_bf.png"
         alt="BidFlow Logo"
@@ -30,6 +37,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Toggle dark mode */}
         <button
           onClick={toggleDarkMode}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-gray-700 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors text-lg"
@@ -38,15 +46,22 @@ export default function Navbar() {
           {darkMode ? "☀️" : "🌙"}
         </button>
 
+        {/* ✅ Información del usuario DINÁMICA (no hardcoded) */}
         <div className="flex items-center gap-2 pl-3 border-l border-gray-200 dark:border-gray-600">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-            AG
+            {inicial}
           </div>
-          <span className="text-sm font-semibold text-slate-800 dark:text-white">
-            Ana García
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-slate-800 dark:text-white leading-tight">
+              {nombre}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 leading-tight">
+              {rol}
+            </span>
+          </div>
         </div>
-    
+
+        {/* Logout */}
         <button
           onClick={handleLogout}
           className="text-xs text-gray-400 hover:text-red-500 transition-colors"
@@ -54,7 +69,6 @@ export default function Navbar() {
           Salir
         </button>
       </div>
-
     </nav>
   )
 }
