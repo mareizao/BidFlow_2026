@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -19,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // 👈 CORREGIDO: La tabla se llama "users" (minúscula, plural)
   @@map("users")
   @@schema("auth")
 }
@@ -29,6 +29,6 @@ enum Rol {
   sme
   finanzas
   juridico
-
+  
   @@schema("auth")
 }
