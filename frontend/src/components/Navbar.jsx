@@ -1,7 +1,16 @@
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 
 export default function Navbar() {
-const { darkMode, toggleDarkMode } = useTheme()
+  const { darkMode, toggleDarkMode } = useTheme()
+  const { logout } = useAuth()  // ← Extraer del contexto
+  const navigate = useNavigate()  // ← Usar navigate de React Router
+
+  const handleLogout = () => {
+    logout()  // Limpia localStorage + contexto Auth
+    navigate("/login", { replace: true })  // Navegación correcta
+  }
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center h-16 px-6 w-full fixed top-0 z-40 transition-colors duration-300">
 
@@ -37,12 +46,9 @@ const { darkMode, toggleDarkMode } = useTheme()
             Ana García
           </span>
         </div>
-
+    
         <button
-          onClick={() => {
-            localStorage.removeItem("token")
-            window.location.href = "/login"
-          }}
+          onClick={handleLogout}
           className="text-xs text-gray-400 hover:text-red-500 transition-colors"
         >
           Salir

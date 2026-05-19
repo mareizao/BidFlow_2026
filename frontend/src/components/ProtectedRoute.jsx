@@ -1,30 +1,25 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+// src/components/ProtectedRoute.jsx
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const ProtectedRoute = ({ children, roles = [] }) => {
-  const { isAuthenticated, loading, hasRole } = useAuth();
+  // ✅ Nombres correctos según tu AuthContext
+  const { isAuthenticated, cargando, tieneRol } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
+  if (cargando) {  // ← no "loading"
+    return <div className="flex justify-center items-center h-screen">Cargando...</div>
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
-  if (roles.length > 0 && !hasRole(roles)) {
-    return <Navigate to="/dashboard" replace />;
+  // ← tieneRol, no hasRole
+  if (roles.length > 0 && !tieneRol(roles)) {
+    return <Navigate to="/" replace />
   }
 
-  return children;
-};
+  return children
+}
 
-export default ProtectedRoute;
+export default ProtectedRoute
