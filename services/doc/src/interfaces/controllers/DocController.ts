@@ -10,38 +10,53 @@ export class DocController {
   async upload(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const file = req.file;
-      const { licitacionId, filename, mimeType, fileSize, storageKey } =
-        req.body;
+      const { licitacionId, storageKey } = req.body;
 
+      // ✅ Validaciones básicas
       if (!file || !licitacionId || !storageKey) {
+        console.warn("⚠️ Faltan datos:", {
+          hasFile: !!file,
+          licitacionId,
+          storageKey,
+          body: req.body,
+        });
         res
           .status(400)
-          .json({ error: "Archivo, licitacionId y metadatos son requeridos" });
+          .json({ error: "Archivo, licitacionId y storageKey son requeridos" });
         return;
       }
 
-      // ✅ Validar fileSize explícitamente
-      const fileSizeNum = Number(fileSize);
-      if (!fileSizeNum || fileSizeNum <= 0) {
+      // ✅ Obtener fileSize de forma segura (prioridad: req.file > req.body > fallback)
+      const fileSize = file.size || Number(req.body.fileSize) || 0;
+      if (!fileSize || fileSize <= 0) {
+        console.warn("⚠️ fileSize inválido:", {
+          file_size: file.size,
+          body_fileSize: req.body.fileSize,
+        });
         res.status(400).json({ error: "fileSize inválido" });
         return;
       }
 
+      // ✅ Payload alineado 1:1 con schema.prisma
       const docRecord = await prisma.documento.create({
         data: {
           id: crypto.randomUUID(),
           licitacionId,
-          filename,
+          filename: file.originalname, // ✅ Usar directamente de req.file
           storageKey,
-          fileSize: fileSizeNum, // ✅ Ahora es un Int válido
-          mimeType,
+          fileSize, // ✅ Ya validado como número válido
+          mimeType: file.mimetype, // ✅ Usar directamente de req.file
           uploadedBy: req.user!.id,
         },
       });
 
       res.status(201).json({ success: true, data: docRecord });
     } catch (error: any) {
-      console.error("[DocController.upload]", error);
+      console.error("[DocController.upload]", {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
       res
         .status(500)
         .json({ error: error.message || "Error interno al guardar documento" });

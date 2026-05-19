@@ -4,30 +4,30 @@ const USAR_MOCK = false
 
 // Subir documento ✅ (esta ya estaba correcta)
 export const uploadDocumento = async (archivo, licitacionId, metadata = {}) => {
-  if (USAR_MOCK) {
-    console.log("Mock: subiendo archivo", archivo.name, "para", licitacionId)
-    return new Promise((resolve) =>
-      setTimeout(() => resolve({ 
-        ok: true, 
-        nombre: archivo.name,
-        id: `doc-${Date.now()}` 
-      }), 1500)
-    )
-  }
-  
   try {
-    const formData = new FormData()
-    formData.append("file", archivo)
-    formData.append("licitacionId", licitacionId) // ✅ Cambiado de "tenderId" a "licitacionId"
+    const formData = new FormData();
+    formData.append("file", archivo);
+    formData.append("licitacionId", String(licitacionId)); // ✅ Como string
     
-    if (metadata.type) formData.append("type", metadata.type)
-    if (metadata.category) formData.append("category", metadata.category)
+    console.log("📤 Upload:", { 
+      fileName: archivo?.name, 
+      fileSize: archivo?.size,
+      licitacionId,
+      type: archivo?.type 
+    }); // ← Log para debug
+
+    const res = await docUploadClient.post("/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     
-    const res = await docUploadClient.post("/upload", formData)
-    return res.data?.data || res.data
+    return res.data?.data || res.data;
   } catch (error) {
-    console.error("Error subiendo documento:", error)
-    throw error
+    console.error("❌ Error en uploadDocumento:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
   }
 }
 
