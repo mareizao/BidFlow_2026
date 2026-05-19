@@ -1,27 +1,34 @@
+// src/main.jsx
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import App from "./App"
-import { AuthProvider } from "./context/AuthContext"  // Verifica esta ruta
+import { AuthProvider } from "./context/AuthContext"
+import { ThemeProvider } from "./context/ThemeContext"  // ← AGREGAR: Importar ThemeProvider
 import "./index.css"
 
 // Capturar errores no manejados
 window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error)
+  console.error('🔴 Global error:', event.error)
 })
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason)
+  console.error('🔴 Unhandled promise rejection:', event.reason)
 })
 
 const root = ReactDOM.createRoot(document.getElementById("root"))
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    {/* 🎨 ThemeProvider debe ser el más externo para que todos los componentes accedan al tema */}
+    <ThemeProvider>
+      {/* 🔐 AuthProvider dentro para que pueda usar el tema si lo necesita */}
       <AuthProvider>
-        <App />
+        {/* 🧭 BrowserRouter al final para que useAuth y useTheme ya estén disponibles */}
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </AuthProvider>
-    </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 )

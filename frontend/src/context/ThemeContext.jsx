@@ -33,5 +33,11 @@ useEffect(() => {
 }
 
 export function useTheme() {
-  return useContext(ThemeContext)
+  const context = useContext(ThemeContext)
+  
+  if (context === undefined) {
+    throw new Error("useTheme() debe usarse dentro de un ThemeProvider. Revisa tu main.jsx")
+  }
+  
+  return context
 }
