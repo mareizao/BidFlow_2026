@@ -1,12 +1,12 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]  // ← Agregar esto
+  previewFeatures = ["multiSchema"]  // ← OBLIGATORIO
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["auth"]  // ← Especificar schema
+  schemas  = ["auth"]  // ← Buscar en schema auth
 }
 
 model User {
@@ -20,7 +20,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
-  @@schema("auth")  // ← Especificar schema
+  @@schema("auth")  // ← Tabla está en auth
 }
 
 enum Rol {
