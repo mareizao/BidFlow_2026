@@ -1,4 +1,3 @@
-// src/main.jsx
 import React from "react"
 import ReactDOM from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
@@ -6,7 +5,18 @@ import App from "./App"
 import { AuthProvider } from "./contexts/AuthContext"
 import "./index.css"
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+// Capturar errores no manejados
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error)
+})
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason)
+})
+
+const root = ReactDOM.createRoot(document.getElementById("root"))
+
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
