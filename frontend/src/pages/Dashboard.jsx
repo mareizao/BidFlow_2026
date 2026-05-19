@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import Navbar from "../components/Navbar"
 import Sidebar from "../components/Sidebar"
 import { getLicitaciones, getDashboardStats, getTareasPendientes } from "../api/bidApi"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../context/AuthContext"
 
 const badgeEstado = (estado) => {
   // Normalizar estado para comparación
