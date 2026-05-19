@@ -1,9 +1,12 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { loginApi } from "../api/authApi"
+import { useAuth } from "../context/AuthContext"
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth() // ✅ Extraemos la función login del contexto
+  
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -21,17 +24,25 @@ export default function Login() {
       return
     }
 
-    // Login real con backend
-    const result = await loginApi(email, password)
+    try {
+      // Login real con backend
+      const result = await loginApi(email, password)
 
-    if (result.success) {
-      // Redirigir al dashboard
-      navigate("/")
-    } else {
-      setError(result.error || "Credenciales inválidas. Por favor intenta nuevamente.")
+      if (result?.success) {
+        // ✅ ACTUALIZAR EL CONTEXTO con los datos del usuario
+        login(result.usuario || result.data?.user)
+        
+        // ✅ Redirigir al dashboard (replace evita que el usuario vuelva al login con "atrás")
+        navigate("/", { replace: true })
+      } else {
+        setError(result?.error || "Credenciales inválidas. Por favor intenta nuevamente.")
+      }
+    } catch (err) {
+      console.error("❌ Error en handleLogin:", err)
+      setError("Error de conexión con el servidor. Intenta más tarde.")
+    } finally {
+      setCargando(false)
     }
-
-    setCargando(false)
   }
 
   return (
