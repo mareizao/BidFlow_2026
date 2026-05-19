@@ -61,20 +61,26 @@ export const crearLicitacion = async (datos) => {
   }
   
   try {
-    // ✅ Backend espera: { titulo, cliente, fechaCierre, areas }
+    // ✅ Backend espera exactamente: { titulo, cliente, fechaCierre, areas }
     const payload = {
-      titulo: datos.titulo || datos.nombre,  // Adaptar si viene como "nombre"
+      titulo: datos.titulo,
       cliente: datos.cliente,
-      fechaCierre: datos.fechaCierre,
-      areas: datos.areas || []
+      fechaCierre: datos.fechaCierre,  // ISO string o date string
+      areas: datos.areas,  // Array: ['SME', 'finanzas']
     }
+    
+    console.log("📡 Enviando a POST /licitaciones:", payload) // ← Log temporal para debug
     
     const res = await bidClient.post("/licitaciones", payload)
     
-    // Backend devuelve el objeto creado directo
+    // ✅ Backend devuelve el objeto creado DIRECTO (no envuelto en "data")
     return res.data || res.data?.data
   } catch (error) {
-    console.error("Error creando licitación:", error)
+    console.error("❌ Error creando licitación:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    })
     throw error
   }
 }
