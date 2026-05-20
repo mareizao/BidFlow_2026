@@ -23,7 +23,7 @@ router.get(
 );
 
 router.get(
-  "/download/:id",
+  '/download/:id',
   authMiddleware,
   (req, res) => controller.download(req as any, res)
 );
