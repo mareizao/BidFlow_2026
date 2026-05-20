@@ -22,8 +22,13 @@ router.get(
   (req, res) => controller.getMisDocumentos(req as any, res)
 );
 
+router.get(
+  "/download/:id",
+  authMiddleware,
+  (req, res) => controller.download(req as any, res)
+);
+
 // ⏸️ Rutas pendientes (comentadas para evitar error TS2339)
-// router.get('/download/:id', authMiddleware, (req, res) => controller.download(req as any, res));
 // router.get('/licitacion/:licitacionId', authMiddleware, (req, res) => controller.getByLicitacion(req as any, res));
 // router.delete('/documento/:id', authMiddleware, (req, res) => controller.deleteDocumento(req as any, res));
 
