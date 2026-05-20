@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext"
 
 // Áreas disponibles (deben coincidir con el enum del backend)
 const AREAS_DISPONIBLES = [
-  { value: "SME", label: "SME - Subject Matter Expert" },
+  { value: "sme", label: "SME - Subject Matter Expert" },      // ✅ "sme" no "SME"
   { value: "finanzas", label: "Finanzas" },
   { value: "juridico", label: "Jurídico / Legal" },
 ]

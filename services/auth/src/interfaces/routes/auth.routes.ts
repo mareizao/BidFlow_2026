@@ -18,5 +18,6 @@ const router = Router();
 router.post('/login', authController.login);
 router.get('/verify', authMiddleware, authController.verify);
 router.get('/health', authController.health);
+router.get('/users', authController.getUsersByRol);
 
 export default router;
