@@ -1,3 +1,4 @@
+// src/pages/Documentos.jsx
 import { useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
 import Sidebar from "../components/Sidebar"
@@ -6,22 +7,21 @@ import { getLicitaciones } from "../api/bidApi"
 
 export default function Documentos() {
   const [documentos, setDocumentos] = useState([])
-  const [licitacionesMap, setLicitacionesMap] = useState({}) // Mapa ID -> Título
+  const [licitacionesMap, setLicitacionesMap] = useState({})
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     const cargarDatos = async () => {
       setCargando(true)
       try {
-        // 1. Obtener documentos
+        // 1. Obtener documentos del usuario actual
         const docsData = await getMisDocumentos()
         setDocumentos(docsData)
 
-        // 2. Obtener licitaciones para mapear títulos
-        // Pedimos un límite alto para asegurar tener los títulos de las licitaciones asociadas
+        // 2. Obtener licitaciones para mapear títulos (evita mostrar solo UUIDs)
         const licsData = await getLicitaciones({ limit: 100 })
         
-        // Crear mapa rápido: { "uuid-licitacion": "Título de la licitación" }
+        // Crear mapa rápido: { "uuid-licitacion": "Título" }
         const mapaTitulos = {}
         licsData.forEach((lic) => {
           mapaTitulos[lic.id] = lic.titulo || lic.nombre || "Sin título"
@@ -36,7 +36,7 @@ export default function Documentos() {
     cargarDatos()
   }, [])
 
-  // Helper para formatear bytes a KB/MB
+  // Helper para formatear tamaño
   const formatSize = (bytes) => {
     if (!bytes) return "0 B"
     const k = 1024
@@ -50,7 +50,6 @@ export default function Documentos() {
       <Navbar />
       <Sidebar />
       <main className="ml-56 pt-16 p-8">
-        
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
           Mis Documentos
         </h1>
@@ -86,7 +85,6 @@ export default function Documentos() {
                         </div>
                       </td>
                       <td className="py-4 px-6 text-sm text-slate-600 dark:text-gray-300">
-                        {/* Aquí usamos el mapa para mostrar el título en lugar del UUID */}
                         {licitacionesMap[doc.licitacionId] || (
                           <span className="text-xs font-mono text-gray-400">ID: {doc.licitacionId?.slice(0, 8)}...</span>
                         )}
