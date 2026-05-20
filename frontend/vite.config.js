@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
+// vite.config.js
 export default defineConfig({
   plugins: [react()],
+  publicDir: 'public',  // ✅ Asegura que Vite use la carpeta public/
+  
   server: {
     port: 3000,
     host: true,
@@ -24,6 +24,7 @@ export default defineConfig({
       }
     }
   },
+  
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -43,6 +44,7 @@ export default defineConfig({
       }
     }
   },
+  
   preview: {
     port: 3000
   },
