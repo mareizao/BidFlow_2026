@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import LicitacionDetalle from "./pages/DetalleLicitacion";
 import CrearLicitacion from "./pages/CrearLicitacion";
+import Documentos from "./pages/Documentos";
 
 // Componente para rutas protegidas
 const ProtectedRoute = ({ children }) => {
