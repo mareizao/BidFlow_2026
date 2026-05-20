@@ -1,7 +1,9 @@
 // vite.config.js
+import { defineConfig } from 'vite'  // ✅ IMPORTANTE: Esta línea debe estar al inicio
+import react from '@vitejs/plugin-react'
+
 export default defineConfig({
   plugins: [react()],
-  publicDir: 'public',  // ✅ Asegura que Vite use la carpeta public/
   
   server: {
     port: 3000,
@@ -48,6 +50,7 @@ export default defineConfig({
   preview: {
     port: 3000
   },
+  
   define: {
     'process.env': {}
   }
