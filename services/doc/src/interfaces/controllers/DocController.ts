@@ -62,4 +62,18 @@ export class DocController {
         .json({ error: error.message || "Error interno al guardar documento" });
     }
   }
+
+   async getMisDocumentos(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Consulta simple: trae todos los documentos donde uploadedBy sea el usuario actual
+      const docs = await prisma.documento.findMany({
+        where: { uploadedBy: req.user!.id },
+        orderBy: { uploadedAt: 'desc' },
+      });
+
+      res.status(200).json({ success: true, data: docs });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

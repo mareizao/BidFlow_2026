@@ -95,3 +95,14 @@ export const eliminarDocumento = async (docId) => {
     throw error
   }
 }
+
+// ✅ Obtener todos los documentos del usuario actual
+export const getMisDocumentos = async () => {
+  try {
+    const res = await docClient.get('/documentos');
+    return res.data?.data || res.data || [];
+  } catch (error) {
+    console.error("Error obteniendo documentos:", error);
+    return [];
+  }
+}

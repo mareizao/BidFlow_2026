@@ -15,6 +15,13 @@ router.post(
   (req, res) => controller.upload(req as any, res)
 );
 
+// ✅ GET /documentos - Lista los documentos del usuario autenticado
+router.get(
+  '/documentos',
+  authMiddleware,
+  (req, res) => controller.getMisDocumentos(req as any, res)
+);
+
 // ⏸️ Rutas pendientes (comentadas para evitar error TS2339)
 // router.get('/download/:id', authMiddleware, (req, res) => controller.download(req as any, res));
 // router.get('/licitacion/:licitacionId', authMiddleware, (req, res) => controller.getByLicitacion(req as any, res));
