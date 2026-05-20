@@ -1,3 +1,4 @@
+// services/bid/src/application/useCases/CreateLicitacionUseCase.ts
 import { LicitacionRepository } from '../../domain/repositories/LicitacionRepository';
 import { TareaRepository } from '../../domain/repositories/TareaRepository';
 import { CreateLicitacionDTO, LicitacionResponseDTO } from '../dtos/BidDTOs';
@@ -20,11 +21,19 @@ export class CreateLicitacionUseCase {
       createdBy: userId,
     });
 
-    // 1) Resolver responsables en paralelo (ADR 6)
+    // ✅ Helper: Mapea input del frontend → Enum AreaTarea de Prisma
+    const normalizarArea = (input: string): AreaTarea => {
+      const lower = input.toLowerCase();
+      if (lower === 'sme') return 'SME' as AreaTarea; // Prisma espera "SME"
+      return lower as AreaTarea; // "finanzas" y "juridico" coinciden tal cual
+    };
+
+    // 1) Resolver responsables por ROL (siempre en minúscula para auth-svc)
     const responsablesPromise = Promise.all(
-      dto.areas.map(async (area) => {
+      dto.areas.map(async (areaInput) => {
+        const rolBusqueda = areaInput.toLowerCase(); // "sme", "finanzas", "juridico"
         try {
-          const usuarios = await this.authClient.getUsersByRol(area.toLowerCase());
+          const usuarios = await this.authClient.getUsersByRol(rolBusqueda);
           return usuarios?.length > 0 ? usuarios[0].id : userId;
         } catch {
           return userId;
@@ -32,17 +41,16 @@ export class CreateLicitacionUseCase {
       })
     );
 
-    // 2) Crear tareas en paralelo (pero con responsables resueltos)
-    //    Usamos una Promise.all independiente para cumplir la estructura del ADR.
+    // 2) Crear tareas con el ÁREA normalizada al Enum
     let tareas: any[];
     try {
       const [responsables] = await Promise.all([responsablesPromise]);
 
       tareas = await Promise.all(
-        dto.areas.map((area, i) =>
+        dto.areas.map((areaInput, i) =>
           this.tareaRepository.save({
             licitacionId: licitacion.id,
-            area: area as AreaTarea,
+            area: normalizarArea(areaInput), // ✅ 'SME', 'finanzas' o 'juridico'
             responsableId: responsables[i],
             estado: 'pendiente',
             horasEstimadas: 0,
