@@ -1,9 +1,11 @@
+// services/bid/src/infrastructure/database/PrismaLicitacionRepository.ts
 import prisma from './prismaClient';
-import { LicitacionRepository, LicitacionFilters } from '../../domain/repositories/LicitacionRepository';
+import { LicitacionRepository, LicitacionFilters, VisibilityContext } from '../../domain/repositories/LicitacionRepository';
 import { Licitacion } from '../../domain/entities/Licitacion';
 import { Tarea } from '../../domain/entities/Tarea';
 
 export class PrismaLicitacionRepository implements LicitacionRepository {
+  
   async save(licitacion: Omit<Licitacion, 'id' | 'createdAt' | 'updatedAt' | 'tareas'>): Promise<Licitacion> {
     const created = await prisma.licitacion.create({
       data: {
@@ -27,7 +29,7 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
 
   async findAll(
     filters: LicitacionFilters,
-    visibility: import('../../domain/repositories/LicitacionRepository').VisibilityContext
+    visibility: VisibilityContext
   ): Promise<{ licitaciones: Licitacion[]; total: number }> {
     const { userId, userRol, userArea } = visibility;
     const page = filters.page || 1;
@@ -40,13 +42,14 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
       where.estado = filters.estado;
     }
 
-    // Filtrado por rol/área
+    // ✅ FILTRADO POR ROL: admin/pre_sales ven todo, otros solo sus tareas
     const rolesGlobales = ['admin', 'pre_sales'];
     if (!rolesGlobales.includes(userRol)) {
       where.tareas = {
         some: {
           responsableId: userId,
-          area: userArea,
+          // Opcional: filtrar también por área si es necesario
+          // area: userArea,
         },
       };
     }
@@ -70,7 +73,6 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
     tareas: Omit<Tarea, 'id' | 'createdAt'>[],
   ): Promise<Licitacion & { tareas: Tarea[] }> {
     return prisma.$transaction(async (tx) => {
-
       const created = await tx.licitacion.create({
         data: {
           titulo: licitacion.titulo,
@@ -81,7 +83,7 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
         },
       });
 
-      const createdTareas = await tx.tarea.createMany({
+      await tx.tarea.createMany({
         data: tareas.map((t) => ({
           licitacionId: created.id,
           area: t.area,
@@ -92,7 +94,6 @@ export class PrismaLicitacionRepository implements LicitacionRepository {
         })),
       });
 
-      // createMany no devuelve entidades; las recuperamos
       const tareasRecuperadas = await tx.tarea.findMany({
         where: { licitacionId: created.id },
       });
